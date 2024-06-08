@@ -1,0 +1,10 @@
+Write a c++ program to with the following components, Circular Buffer, pcie DMA , Input External, host as separate classes running on different threads :
+
+Circular Buffer:  To hold part of an image of size nrowsxncols. The buffer should be an array of integers of size maxsize. maxsize = nbufxncols. It maintains a read and a write pointer which is an index into the array. There should be a read function from which you can extract nrxncols  of data if available. Also a write function to write nwxncols  of data at a time. The write function should check whether space is available for the write.  The buffer can hold nbuf rows and when full should wrap wround the address.
+
+pcie DMA : Accepts requests to fetch data from memory address src_addr of length nlen and writes to circular buffer. Once the data is copied sends out a Done message to the caller. Also maintains a busy status if it is currently in the process of copying data.
+
+Input External: The input external process has knowledge of the number of rows of data present in the circular buffer and the max rows it can hold nbuf. Also it knows the nrows and ncols of the image and the memory address where the image resides. 
+Is invoked from the host process. Checks if space available in the circular buffer for npciexncols elements.  It  will send a request to the pcie module to fetch npciexncols data from the image_address + curr_src_addr and write to the circular buffer. It will update the curr_src_addr at the end of the transfer. If the transfer of npciexncols  goes beyond the buffer boundary nbufxncols it should be broken into two transfers, one to the end of the buffer and the other from the start. It dies after the data transfer message is received from pcie dma.
+
+Host : The host process will start by allocating memory for image of size nrowsxncols. The memory address at which the image is located is src_addr.  Will initiate the Input External process with parameters src_addr,nrows, ncols, nbuf, npcie, circular buffer and pcie DMA. It will then iterate through the image rows and initiate the Input external process. Reduce row count by npcie after each iteration.
